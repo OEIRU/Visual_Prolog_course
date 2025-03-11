@@ -1,4 +1,3 @@
-% Predicates
 predicates
     nondeterm parent(symbol, symbol)
     nondeterm lucky(symbol)
@@ -6,56 +5,62 @@ predicates
     nondeterm grandson(symbol, symbol) /*1-grandparent, 2-grandson*/
     nondeterm sister(symbol, symbol) /*1-man, 2-sister*/
     nondeterm aunt(symbol, symbol) /*1-aunt, 2-person*/
-    gender(symbol, symbol)
+    nondeterm gender(symbol, symbol)
 
-% Clauses
+
 clauses
-    % First generation
-    parent(grandma1, igor).
-    parent(grandpa1, igor).
-    parent(grandma1, antonina).
-    parent(grandpa1, antonina).
+	parent(mikhail, petr).
+	parent(anna, aleksey).
+	parent(anna, olga).
+	parent(anna, ivan).
+	parent(petr, aleksey).
+	parent(petr, olga).
+	parent(petr, ivan).
+	parent(petr, andrey).
+	parent(mariya, andrey).
+	parent(ivan, yelena).
+	parent(ivan, anastasiya).
+	parent(yelena, sofya).
+	parent(sofya, polina).
+	parent(viktoriya, sergey).
+	parent(andrey, viktoriya).
+	parent(andrey, kseniya).
+	parent(kseniya, yuliya).
+	parent(kseniya, dmitriy).
+	parent(sergey, viktor).
+	parent(yuliya, kirill).
+	parent(dmitriy, kirill).
+	parent(kirill, maksim).
+	parent(maksim, artem).
+	parent(maksim, egor).
 
-    parent(grandma2, valentina).
-    parent(grandpa2, valentina).
-    parent(grandma2, alexander).
-    parent(grandpa2, alexander).
-
-    % Second generation
-    parent(igor, vladimir).
-    parent(valentina, vladimir).
-    parent(igor, maxim).
-    parent(valentina, maxim).
-
-    parent(noName, ekaterina).
-    parent(antonina, ekaterina).
-
-    % Third generation
-    parent(chibz, bee1).
-    parent(ekaterina, bee1).
-    parent(chibz, bee2).
-    parent(ekaterina, bee2).
-
-    % Genders of individuals
-    gender(grandma1, female).
-    gender(grandpa1, male).
-    gender(grandma2, female).
-    gender(grandpa2, male).
-    gender(igor, male).
-    gender(antonina, female).
-    gender(valentina, female).
-    gender(alexander, male).
-    gender(vladimir, male).
-    gender(maxim, male).
-    gender(noName, male).
-    gender(ekaterina, female).
-    gender(chibz, male).
-    gender(bee1, female). % Assume Bee1 is female
-    gender(bee2, male).   % Assume Bee2 is male
-
-    % Rules
+	gender(mikhail, male).
+	gender(petr, male).
+	gender(aleksey, male).
+	gender(ivan, male).
+	gender(sergey, male).
+	gender(dmitriy, male).
+	gender(viktor, male).
+	gender(kirill, male).
+	gender(maksim, male).
+	gender(artem, male).
+	gender(egor, male).
+	gender(viktoriya, female).
+	gender(kseniya, female).
+	gender(yuliya, female).
+	gender(anna, female).
+	gender(mariya, female).
+	gender(olga, female).
+	gender(yelena, female).
+	gender(anastasiya, female).
+	gender(sofya, female).
+	gender(polina, female).
+	gender(andrey, female).
+	gender(alina, female).
+	
     lucky(Name) :- 
-        parent(Name, _).
+        parent(Name, Child),
+        !.
 
     have2children(Name) :-
         parent(Name, Child1),
@@ -77,18 +82,9 @@ clauses
         parent(Parent, Pl),
         sister(Parent, Au).
 
-% Goal block
-goal     
-write("Program results:\n"),     
-nl,      
-% Uncomment only one query at a time to test it     
-% lucky(grandma1).     
-% lucky(grandpa1).     
-% lucky(igor).     
-% lucky(noName).      
-% have2children(igor).     
-% have2children(chibz).      
-% grandson(vladimir, igor).     
-% grandson(ekaterina, grandma1).      
-% aunt(antonina, vladimir).     
-aunt(grandma1, vladimir). 
+
+goal    
+	write("Program results:\n"),     
+        sister(aleksey, olga).
+        % aunt(olga, yelena).
+        %lucky(maksim).

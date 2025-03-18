@@ -1,15 +1,16 @@
 % TODO
-% 1. Переработать domains
-% 2. Добавить проверки на некорректный ввод
-% 3. Проверка пустоты
-% 4. Проверка на логику возвраста
+% [x] 1. Переработать domains
+% [ ] 2. Добавить проверки на некорректный ввод
+% [ ] 3. Проверка пустоты
+% [ ] 4. Проверка на логику возвраста
 
 domains
+	name = symbol
 	i = integer
 	list = i*
 database
-	toy_name(symbol)
-	toy(symbol,integer,integer,integer)
+	toy_name(name)
+	toy(name,integer,integer,integer)
 	price(integer)
 	minage(integer)
 	maxage(integer)
@@ -18,18 +19,18 @@ predicates
 	nondeterm choice(integer)
 	menu
 	nondeterm repeat
-	nondeterm query_a(symbol,integer,integer)
-	nondeterm query_b(symbol,integer,integer)
+	nondeterm query_a(name,integer,integer)
+	nondeterm query_b(name,integer,integer)
 	nondeterm query_c(integer) 	
-	nondeterm query_d(symbol,symbol,integer)		
-	nondeterm query_e(symbol)
+	nondeterm query_d(name,symbol,integer)		
+	nondeterm query_e(name)
 	nondeterm max(list,integer)
 
 clauses
 
 	menu :-		
 		repeat,		
-		write("------------------------------------\n"),
+		write(" ********************************* "),nl,
 		write("Make your choice:\n"),
 		write("1 - task 1\n"),
 		write("2 - task 2\n"),
@@ -41,6 +42,7 @@ clauses
 		write("s - save database in file\n"),
 		write("l - load database from file\n"),
 		write("0 - exit\n"),
+		write(" ********************************* "),nl,
 		readchar(Choice),
 		choice(Choice),
 		Choice='0',
@@ -60,7 +62,7 @@ clauses
     toy("pyramid", 180, 1, 4).
     toy("chess", 600, 4, 10).
 
-	choice('6'):-		/*dobavlenie cheloveka*/
+	choice('6'):-		% Добавление человека
 		write("Name of adding toy: "),
 		readln(Name),
 		write("Price: "),
@@ -98,13 +100,14 @@ clauses
 		query_d(_,ReqName,ReqPrice).
 	choice('5'):-
 		query_e(_).
-	choice('s'):-		/*sohraneniya bazi v file*/
+	choice('s'):-		% Сохранение базы в файл
 		save("C:\base"),
 		write("Information saved successfully\n").
 
-	choice('l'):-		/*load database from file*/
+	choice('l'):-		% Загрузка базы из файла 
 		existfile("E:\base"),!,
-		consult("C:\base").
+		consult("E:\base").
+
 		choice('0') :-
 		!.
 	

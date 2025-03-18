@@ -19,7 +19,7 @@ clauses
     % Main menu
     menu :-
         repeat,
-        write("------------------------------------\n"),
+        write(" ********************************* "),nl,
         write("1 - Add a person\n"),
         write("2 - Add a language\n"),
         write("3 - Show all people\n"),
@@ -27,6 +27,7 @@ clauses
         write("s - Save the database\n"),
         write("l - Load the database\n"),
         write("0 - Exit\n"),
+        write(" ********************************* "),nl,
         readchar(Choice),
         choice(Choice),
         Choice = '0',
@@ -53,7 +54,7 @@ clauses
     choice('3') :-
         know_language(Name, Lang),
         write(Name, " knows ", Lang), nl,
-        fail.
+        fail;
 
     % Show all languages
     choice('4') :-
@@ -81,7 +82,6 @@ clauses
     choice('0') :-
         !.
         
-
     % Infinite loop
     repeat.
     repeat :- repeat.

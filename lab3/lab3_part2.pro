@@ -1,54 +1,26 @@
-% TODO
-% [x] 1. Переработать domains
-% [ ] 2. Добавить проверки на некорректный ввод
-% [ ] 3. Проверка пустоты
-% [ ] 4. Проверка на логику возвраста
-
 domains
-	name = symbol
-	i = integer
-	list = i*
+    name = symbol
+    i = integer
+    list = i*
+
 database
-	toy_name(name)
-	toy(name,integer,integer,integer)
-	price(integer)
-	minage(integer)
-	maxage(integer)
+    toy(name, i, i, i)
 
 predicates
-	nondeterm choice(integer)
-	menu
-	nondeterm repeat
-	nondeterm query_a(name,integer,integer)
-	nondeterm query_b(name,integer,integer)
-	nondeterm query_c(integer) 	
-	nondeterm query_d(name,symbol,integer)		
-	nondeterm query_e(name)
-	nondeterm max(list,integer)
+    nondeterm choice(char)
+    menu
+    nondeterm repeat
+    nondeterm query_a(name, i, i)
+    nondeterm query_b(name, i, i)
+    nondeterm query_c(i)
+    nondeterm query_d(name, name, i)
+    nondeterm query_e(name)
+    max(list, i)
+    max(list, i, i)  % Добавлена объявление для 3-аргументной версии
 
 clauses
-
-	menu :-		
-		repeat,		
-		write(" ********************************* "),nl,
-		write("Make your choice:\n"),
-		write("1 - task 1\n"),
-		write("2 - task 2\n"),
-		write("3 - task 3\n"),
-		write("4 - task 4\n"),
-		write("5 - task 5\n"),
-		write("6 - add information about toy\n"),
-		write("7 - show all toys\n"),
-		write("s - save database in file\n"),
-		write("l - load database from file\n"),
-		write("0 - exit\n"),
-		write(" ********************************* "),nl,
-		readchar(Choice),
-		choice(Choice),
-		Choice='0',
-		!.
-	repeat.
-	repeat :- repeat.	
+    repeat.
+    repeat :- repeat.
 
     toy("doll", 350, 3, 8).
     toy("blocks_blue", 200, 2, 6).
@@ -62,93 +34,125 @@ clauses
     toy("pyramid", 180, 1, 4).
     toy("chess", 600, 4, 10).
 
-	choice('6'):-		% Добавление человека
-		write("Name of adding toy: "),
-		readln(Name),
-		write("Price: "),
-		readint(Price),
-		write("Minimum age: "),
-		readint(MinAge),
-		write("Miximum age: "),
-		readint(MaxAge),
-		assert(toy(Name, Price, MinAge, MaxAge)),
-		fail.
-
-	choice('7'):-
-		write("The presence of toys in the database:\n"),
-		toy(Name,Price,MinAge,MaxAge),
-		write("Name : ",Name, ";   Price : ",Price,";   Minimum age : ", MinAge,";   Maximum age : ",MaxAge),nl.
-	choice('1'):-
-		write("Enter price: "),
-		readint(Price),
-		write("Enter minimum age: "),
-		readint(MinAge),
-		query_a(_,Price,MinAge).
-	choice('2'):-
-		write("Enter minimum age: "),
-		readint(ReqMinAge),
-		write("Enter maximum age: "),
-		readint(ReqMaxAge),
-		query_b(_,ReqMinAge,ReqMaxAge).
-	choice('3'):-
-		query_c(_).
-	choice('4'):-
-		write("Enter name: "),
-		readln(ReqName),
-		write("Enter price: "),
-		readint(ReqPrice),
-		query_d(_,ReqName,ReqPrice).
-	choice('5'):-
-		query_e(_).
-	choice('s'):-		% Сохранение базы в файл
-		save("C:\base"),
-		write("Information saved successfully\n").
-
-	choice('l'):-		% Загрузка базы из файла 
-		existfile("E:\base"),!,
-		consult("E:\base").
-
-		choice('0') :-
-		!.
-	
-	query_a(Name,ReqPrice,ReqMinAge):-
-        	toy(Name,Price,Minage,_), 
-		Price <= ReqPrice,
-		Minage <= ReqMinAge,
-		write(Name),nl.
-
-	query_b(Name,ReqAge1,ReqAge2):-
-		toy(Name,_,Minage,MaxAge),
-		ReqAge1 >= MinAge,
-		ReqAge2 <= MaxAge,
-		write(Name),nl.
-
-	query_c(Price):-
-		toy(red_blocks,Price1, _, _),  
-		toy(blue_blocks,Price2, _, _),
-		toy(pink_blocks,Price3, _, _),
-		toy(yellow_blocks,Price4, _, _),
-		Price=(Price1+Price2+Price3+Price4),
-		write(Price),nl.
-
-	query_d(Name,ReqName, ReqPrice):-
-		findall(N,toy(ReqName,N,_,_),L),
-		L=[H|_],
-		toy(Name,Price,_,_),
-		H+Price <= ReqPrice,
-		"ball"<>Name,
-		write(Name),nl.
-
-	query_e(Name):-
-		findall(Price, toy(_,Price,_,_), L),
-		max(L,Max),
-		toy(Name,Price,_,_),
-		(Max-Price) <= 1,
-		write(Name),nl.
+ menu :-
+        repeat,
+        write("\n*********************************\n"),
+        write("Make your choice:\n"),
+        write("1 - Task 1: Toys <= price and suitable for min age\n"),
+        write("2 - Task 2: Toys for age range\n"),
+        write("3 - Task 3: Total price of blocks\n"),
+        write("4 - Task 4: Toys combinable with another\n"),
+        write("5 - Task 5: Toys near max price\n"),
+        write("6 - Add toy\n"),
+        write("7 - Show all toys\n"),
+        write("s - Save database\n"),
+        write("l - Load database\n"),
+        write("0 - Exit\n"),
+        write("*********************************\n"),
+        readchar(Choice),
+        choice(Choice),
+        Choice = '0',
+        !.
         
-	max([Head|Tail],Result):-
-        	max(Tail,Result), Result > Head,!.
-    	max([Head|_],Head).	
-	
+    choice('6') :-
+        write("Name: "), readln(Name),
+        write("Price: "), readint(Price),
+        write("Min age: "), readint(MinAge),
+        write("Max age: "), readint(MaxAge),
+        assert(toy(Name, Price, MinAge, MaxAge)),
+        write("Added.\n").
+
+    choice('7') :-
+        toy(Name, Price, MinAge, MaxAge),
+        write("Name: ", Name, ", Price: ", Price, ", Ages: ", MinAge, "-", MaxAge, "\n"),
+        fail.
+    choice('7').
+
+    choice('1') :-
+        write("Price limit: "), readint(Price),
+        write("Min age: "), readint(MinAge),
+        query_a(_, Price, MinAge),
+        fail.
+    choice('1').
+
+    choice('2') :-
+        write("Min age: "), readint(ReqMin),
+        write("Max age: "), readint(ReqMax),
+        query_b(_, ReqMin, ReqMax),
+        fail.
+    choice('2').
+
+    choice('3') :-
+        query_c(Total),
+        write("Total for blocks: ", Total, "\n").
+
+    choice('4') :-
+        write("Toy name: "), readln(ReqName),
+        write("Max total price: "), readint(MaxPrice),
+        query_d(_, ReqName, MaxPrice),
+        fail.
+    choice('4').
+
+    choice('5') :-
+        query_e(Name),
+        write(Name, "\n"),
+        fail.
+    choice('5').
+
+    choice('s') :-
+        save("toys.dat"),
+        write("Saved.\n").
+
+    choice('l') :-
+        existfile("toys.dat"),
+        consult("toys.dat"),
+        write("Loaded.\n").
+
+    choice('0').
+
+    choice(_) :- write("Invalid option.\n").
+
+    /* Остальные предикаты */
+    query_a(Name, ReqPrice, ReqMinAge) :-
+        toy(Name, Price, MinAge, MaxAge),
+        Price <= ReqPrice,
+        MinAge <= ReqMinAge,
+        MaxAge >= ReqMinAge,
+        write(Name, "\n").
+
+    query_b(Name, ReqMin, ReqMax) :-
+        toy(Name, _, ToyMin, ToyMax),
+        ReqMin <= ToyMax,
+        ReqMax >= ToyMin,
+        write(Name, "\n").
+
+    query_c(Total) :-
+        toy(blocks_red, P1, _, _),
+        toy(blocks_blue, P2, _, _),
+        toy(blocks_green, P3, _, _),
+        Total = P1 + P2 + P3.
+
+    query_d(Name, ReqName, MaxPrice) :-
+        toy(ReqName, Price1, _, _),
+        toy(Name, Price2, _, _),
+        Name <> ReqName,
+        Price1 + Price2 <= MaxPrice,
+        write(Name, "\n").
+
+    query_e(Name) :-
+        findall(P, toy(_, P, _, _), Prices),
+        max(Prices, Max),
+        toy(Name, Price, _, _),
+        Max - Price <= 1.
+
+    /* Исправленная реализация max */
+    max([H|T], Max) :- max(T, H, Max).
+    max([], Max, Max).
+    max([H|T], CurrMax, Max) :-
+        H > CurrMax, !, 
+        max(T, H, Max).
+    max([_|T], CurrMax, Max) :- 
+        max(T, CurrMax, Max).
+
 goal
     menu.

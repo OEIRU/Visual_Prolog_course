@@ -1,66 +1,68 @@
 domains
-    type = integer
-    list = type*
-    listlist = list*
+    element = integer
+    collection = element*
+    pair_collection = collection*
 
 predicates
-    nondeterm unionset(list, list, list)      % Объединение двух списков
-    nondeterm intersect(list, list, list)     % Пересечение двух списков
-    nondeterm del(type, list, list)           % Удаление одного элемента из списка
-    nondeterm dellist(list, list, list)       % Вычитание списков
-    nondeterm decart(list, list, listlist)    % Декартово произведение
-    nondeterm member(type, list)              % Проверка принадлежности элемента списку
-    nondeterm cart(list,list,list,listlist)
+    nondeterm merge_collections(collection, collection, collection)     % Объединение коллекций
+    nondeterm find_common_elements(collection, collection, collection)  % Поиск общих элементов
+    nondeterm remove_element(element, collection, collection)           % Удаление одного элемента
+    nondeterm subtract_collections(collection, collection, collection)  % Вычитание коллекций
+    nondeterm generate_pairs(collection, collection, pair_collection)   % Генерация пар элементов
+    nondeterm pair_combinations(collection, collection, collection, pair_collection)
+    nondeterm is_member(element, collection)                            % Проверка принадлежности элемента
+
 clauses
-    % Объединение двух списков
-    unionset([], List, List).  % Если первый список пуст, результат — второй список
-    unionset([Head | Tail], List2, Result) :-
-        member(Head, List2), !,               % Если элемент уже есть во втором списке, пропускаем его
-        unionset(Tail, List2, Result).
-    unionset([Head | Tail], List2, [Head | Result]) :-
-        unionset(Tail, List2, Result).        % Иначе добавляем элемент в результат
+    % Объединение двух коллекций
+    merge_collections([], Second, Second).
+    merge_collections([Head | Tail], Second, Result) :-
+        not(is_member(Head, Second)), !,
+        merge_collections(Tail, Second, Temp),
+        Result = [Head | Temp].
+    merge_collections([_ | Tail], Second, Result) :-
+        merge_collections(Tail, Second, Result).
 
-    % Пересечение двух списков
-    intersect([], _, []).                     % Если первый список пуст, пересечение пустое
-    intersect([Head | Tail], List2, [Head | Result]) :-
-        member(Head, List2), !,               % Если элемент есть во втором списке, добавляем его
-        intersect(Tail, List2, Result).
-    intersect([_ | Tail], List2, Result) :-
-        intersect(Tail, List2, Result).       % Иначе продолжаем проверку
+    % Поиск общих элементов в коллекциях
+    find_common_elements([], _, []).
+    find_common_elements([Head | Tail], Second, [Head | Common]) :-
+        is_member(Head, Second), !,
+        find_common_elements(Tail, Second, Common).
+    find_common_elements([_ | Tail], Second, Common) :-
+        find_common_elements(Tail, Second, Common).
 
-    % Удаление элемента из списка
-    del(Element, [Element | Tail], Tail).     % Если элемент найден, удаляем его
-    del(Element, [Head | Tail], [Head | Result]) :-
-        del(Element, Tail, Result).           % Иначе продолжаем поиск
+    % Удаление элемента из коллекции
+    remove_element(Element, [Element | Rest], Rest).
+    remove_element(Element, [Head | Tail], [Head | NewTail]) :-
+        remove_element(Element, Tail, NewTail).
 
-    % Вычитание списков
-    dellist(List, [], List).                  % Если второй список пуст, результат — первый список
-    dellist(List1, [Head | Tail], Result) :-
-        member(Head, List1),                  % Если элемент есть в первом списке
-        del(Head, List1, Temp),               % Удаляем его из первого списка
-        dellist(Temp, Tail, Result).          % Продолжаем вычитание
-    dellist(List1, [_ | Tail], Result) :-
-        dellist(List1, Tail, Result).         % Иначе игнорируем элемент
+    % Вычитание одной коллекции из другой
+    subtract_collections(Collection, [], Collection).
+    subtract_collections(Collection, [Element | Tail], Result) :-
+        is_member(Element, Collection), !,
+        remove_element(Element, Collection, Temp),
+        subtract_collections(Temp, Tail, Result).
+    subtract_collections(Collection, [_ | Tail], Result) :-
+        subtract_collections(Collection, Tail, Result).
 
-    % Декартово произведение
-    decart(List1, List2, Result) :-
-        cart(List1, List2, List2, Result).    % Запускаем вспомогательный предикат
+    % Генерация декартова произведения
+    generate_pairs(Collection1, Collection2, Pairs) :-
+        pair_combinations(Collection1, Collection2, Collection2, Pairs).
 
-    cart([], _, _, []).                       % Если первый список пуст, результат пустой
-    cart(_, [], _, []).                       % Если второй список пуст, результат пустой
-    cart([Head1 | Tail1], [Head2 | Tail2], OriginalList2, [[Head1, Head2] | Result]) :-
-        cart([Head1 | Tail1], Tail2, OriginalList2, Result). % Формируем пары
-    cart([Head1 | Tail1], [], OriginalList2, Result) :-
-        cart(Tail1, OriginalList2, OriginalList2, Result).   % Переходим к следующему элементу первого списка
+    pair_combinations([], _, _, []).
+    pair_combinations(_, [], _, []).
+    pair_combinations([First | Rest1], [Second | Rest2], Original, [[First, Second] | Pairs]) :-
+        pair_combinations([First | Rest1], Rest2, Original, Pairs).
+    pair_combinations([_ | Rest1], [], Original, Pairs) :-
+        pair_combinations(Rest1, Original, Original, Pairs).
 
-    % Проверка принадлежности элемента списку
-    member(Element, [Element | _]).           % Элемент найден
-    member(Element, [_ | Tail]) :-
-        member(Element, Tail).                % Продолжаем поиск в хвосте
+    % Проверка принадлежности элемента к коллекции
+    is_member(Element, [Element | _]).
+    is_member(Element, [_ | Tail]) :-
+        is_member(Element, Tail).
 
 goal
-    % Тестовые запросы
-    % unionset([1, 3, 5, 7, 9], [2, 4, 6, 8, 0], L).
-    % intersect([1, 3, 4, 6, 7, 8, 9], [9, 2, 5, 1, 7, 0], L).
-    % dellist([1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 3, 5, 7, 9, 0], L).
-    % decart([1, 2, 3], [9, 8, 7], L).
+    % Примеры использования:
+    % merge_collections([1, 3, 5], [2, 4, 6], Result).  % Результат: [1, 3, 5, 2, 4, 6]
+    % find_common_elements([1, 3, 5], [3, 5, 7], Result).  % Результат: [3, 5]
+    % subtract_collections([1, 2, 3, 4], [2, 4], Result).  % Результат: [1, 3]
+    % generate_pairs([1, 2], [3, 4], Result).  % Результат: [[1, 3], [1, 4], [2, 3], [2, 4]]
